@@ -321,7 +321,12 @@ public class RNCameraView extends CameraView implements LifecycleEventListener, 
             orientation = options.getInt("orientation");
           }
 
-          if (RNCameraView.super.record(path, maxDuration * 1000, maxFileSize, recordAudio, profile, orientation, fps)) {
+          String audioPath = null;
+          if (options.hasKey("audioPath")) {
+            audioPath = options.getString("audioPath");
+          }
+
+          if (RNCameraView.super.record(path, maxDuration * 1000, maxFileSize, recordAudio, profile, orientation, fps, audioPath)) {
             mIsRecording = true;
             mVideoRecordedPromise = promise;
           } else {

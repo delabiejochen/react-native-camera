@@ -36,9 +36,12 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.CamcorderProfile;
 import android.media.Image;
 import android.media.ImageReader;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.media.MediaActionSound;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.Surface;
@@ -229,6 +232,7 @@ class Camera2 extends CameraViewImpl implements MediaRecorder.OnInfoListener, Me
     private int mImageFormat;
 
     private MediaRecorder mMediaRecorder;
+    private MediaPlayer mAudioPlayer;
 
     private String mVideoPath;
 
@@ -569,10 +573,28 @@ class Camera2 extends CameraViewImpl implements MediaRecorder.OnInfoListener, Me
         }
     }
 
+    private void setupAudioPlayer(String path) {
+        mAudioPlayer = new MediaPlayer();
+        try {
+            mAudioPlayer.setDataSource(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+            mAudioPlayer = null;
+        }
+    }
+
     @Override
-    boolean record(String path, int maxDuration, int maxFileSize, boolean recordAudio, CamcorderProfile profile, int orientation, int fps) {
+    boolean record(String path, int maxDuration, int maxFileSize, boolean recordAudio, CamcorderProfile profile, int orientation, int fps, @Nullable String audioFile) {
         if (!mIsRecording) {
             setUpMediaRecorder(path, maxDuration, maxFileSize, recordAudio, profile);
+            if (audioFile != null) {
+                setupAudioPlayer(audioFile);
+                try {
+                    mAudioPlayer.prepare();
+                } catch (IOException e) {
+                    mAudioPlayer = null;
+                }
+            }
             try {
                 mMediaRecorder.prepare();
 
@@ -592,6 +614,10 @@ class Camera2 extends CameraViewImpl implements MediaRecorder.OnInfoListener, Me
                 mCamera.createCaptureSession(Arrays.asList(surface, mMediaRecorderSurface),
                     mSessionCallback, null);
                 mMediaRecorder.start();
+
+                if (audioFile != null) {
+                    mAudioPlayer.start();
+                }
                 mIsRecording = true;
 
                 // @TODO: implement videoOrientation and deviceOrientation calculation
@@ -609,6 +635,13 @@ class Camera2 extends CameraViewImpl implements MediaRecorder.OnInfoListener, Me
 
     @Override
     void stopRecording() {
+        if (mAudioPlayer != null) {
+            mAudioPlayer.stop();
+            mAudioPlayer.reset();
+            mAudioPlayer.release();
+            mAudioPlayer = null;
+        }
+
         if (mIsRecording) {
             stopMediaRecorder();
 

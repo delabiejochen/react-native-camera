@@ -21,10 +21,13 @@ import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.media.MediaActionSound;
 import android.os.Build;
 import android.os.Handler;
+
+import androidx.annotation.Nullable;
 import androidx.collection.SparseArrayCompat;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -91,6 +94,7 @@ class Camera1 extends CameraViewImpl implements MediaRecorder.OnInfoListener,
     private final Camera.CameraInfo mCameraInfo = new Camera.CameraInfo();
 
     private MediaRecorder mMediaRecorder;
+    private MediaPlayer mAudioPlayer;
 
     private String mVideoPath;
 
@@ -823,9 +827,19 @@ class Camera1 extends CameraViewImpl implements MediaRecorder.OnInfoListener,
             throw new IllegalStateException("Camera capture failed. Camera is already capturing.");
         }
     }
+    private void setupAudioPlayer(String path) {
+        mAudioPlayer = new MediaPlayer();
+        try {
+            mAudioPlayer.setDataSource(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+            mAudioPlayer = null;
+        }
+    }
+
 
     @Override
-    boolean record(String path, int maxDuration, int maxFileSize, boolean recordAudio, CamcorderProfile profile, int orientation, int fps) {
+    boolean record(String path, int maxDuration, int maxFileSize, boolean recordAudio, CamcorderProfile profile, int orientation, int fps, @Nullable String audioFile) {
 
         // make sure compareAndSet is last because we are setting it
         if (!isPictureCaptureInProgress.get() && mIsRecording.compareAndSet(false, true)) {
@@ -834,8 +848,19 @@ class Camera1 extends CameraViewImpl implements MediaRecorder.OnInfoListener,
             }
             try {
                 setUpMediaRecorder(path, maxDuration, maxFileSize, recordAudio, profile, fps);
+                if (audioFile != null) {
+                    setupAudioPlayer(audioFile);
+                    try {
+                        mAudioPlayer.prepare();
+                    } catch (IOException e) {
+                        mAudioPlayer = null;
+                    }
+                }
                 mMediaRecorder.prepare();
                 mMediaRecorder.start();
+                if (audioFile != null) {
+                    mAudioPlayer.start();
+                }
 
                 // after our media recorder is set and started, we must update
                 // some camera parameters again because the recorder's exclusive access (after unlock is called)
@@ -865,6 +890,12 @@ class Camera1 extends CameraViewImpl implements MediaRecorder.OnInfoListener,
 
     @Override
     void stopRecording() {
+        if (mAudioPlayer != null) {
+            mAudioPlayer.stop();
+            mAudioPlayer.reset();
+            mAudioPlayer.release();
+            mAudioPlayer = null;
+        }
         if (mIsRecording.compareAndSet(true, false)) {
             stopMediaRecorder();
             if (mCamera != null) {
