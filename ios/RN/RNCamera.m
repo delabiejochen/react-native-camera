@@ -1006,7 +1006,12 @@ BOOL _sessionInterrupted = NO;
 	}
 
 	NSInteger orientation = [options[@"orientation"] integerValue];
-
+	
+	NSString *audioPath = [options[@"audioPath"] stringValue];
+	if (audioPath) {
+		self.audioPath = audioPath;
+	}
+	
 	// some operations will change our config
 	// so we batch config updates, even if inner calls
 	// might also call this, only the outermost commit will take effect
@@ -1219,7 +1224,7 @@ BOOL _sessionInterrupted = NO;
 					NSURL *url = [NSURL fileURLWithPath:self.audioPath];
 					NSString *type = url.pathExtension;
 					NSString *file = [url.path.lastPathComponent stringByDeletingPathExtension];
-					NSString *directory = [url.path stringByDeletingLastPathComponent];
+					NSString *directory = [[url.path stringByDeletingLastPathComponent] lastPathComponent];
 					[self playSoundWithFile:file ofType:type inDirectory:directory];
 				}
 
@@ -1271,7 +1276,7 @@ BOOL _sessionInterrupted = NO;
 			[self.soundPlayer stop];
 		}
 		self.soundPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:soundFileURL error:nil];
-		self.soundPlayer.numberOfLoops = -1;
+		self.soundPlayer.numberOfLoops = 0; //-1;
 		
 		[self.soundPlayer play];
 	} else {
