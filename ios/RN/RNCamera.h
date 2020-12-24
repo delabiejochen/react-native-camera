@@ -11,8 +11,8 @@
 @class RNCustomWhiteBalanceSettings;
 
 @interface RNCamera : UIView <AVCaptureMetadataOutputObjectsDelegate,
-                              AVCaptureFileOutputRecordingDelegate,
-                              AVCaptureVideoDataOutputSampleBufferDelegate>
+							  AVCaptureFileOutputRecordingDelegate,
+							  AVCaptureVideoDataOutputSampleBufferDelegate>
 
 @property(nonatomic, strong) dispatch_queue_t sessionQueue;
 @property(nonatomic, strong) AVCaptureSession *session;
@@ -51,11 +51,12 @@
 @property(nonatomic, assign) BOOL captureAudio;
 @property(nonatomic, assign) BOOL keepAudioSession;
 @property(nonatomic, assign) BOOL useNativeZoom;
+@property(nonatomic, strong) NSString *audioPath;
 
 @property(nonatomic, assign) CGRect rectOfInterest;
 @property(assign, nonatomic) AVVideoCodecType videoCodecType;
 @property(assign, nonatomic)
-    AVCaptureVideoStabilizationMode videoStabilizationMode;
+	AVCaptureVideoStabilizationMode videoStabilizationMode;
 @property(assign, nonatomic, nullable) NSNumber *defaultVideoQuality;
 @property(assign, nonatomic, nullable) NSNumber *deviceOrientation;
 @property(assign, nonatomic, nullable) NSNumber *orientation;
@@ -82,17 +83,17 @@
 - (void)updateGoogleVisionBarcodeMode:(id)requestedMode;
 
 - (void)takePicture:(NSDictionary *)options
-            resolve:(RCTPromiseResolveBlock)resolve
-             reject:(RCTPromiseRejectBlock)reject;
+			resolve:(RCTPromiseResolveBlock)resolve
+			 reject:(RCTPromiseRejectBlock)reject;
 - (void)takePictureWithOrientation:(NSDictionary *)options
-                           resolve:(RCTPromiseResolveBlock)resolve
-                            reject:(RCTPromiseRejectBlock)reject;
+						   resolve:(RCTPromiseResolveBlock)resolve
+							reject:(RCTPromiseRejectBlock)reject;
 - (void)record:(NSDictionary *)options
-       resolve:(RCTPromiseResolveBlock)resolve
-        reject:(RCTPromiseRejectBlock)reject;
+	   resolve:(RCTPromiseResolveBlock)resolve
+		reject:(RCTPromiseRejectBlock)reject;
 - (void)recordWithOrientation:(NSDictionary *)options
-                      resolve:(RCTPromiseResolveBlock)resolve
-                       reject:(RCTPromiseRejectBlock)reject;
+					  resolve:(RCTPromiseResolveBlock)resolve
+					   reject:(RCTPromiseRejectBlock)reject;
 - (void)stopRecording;
 - (void)resumePreview;
 - (void)pausePreview;

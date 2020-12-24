@@ -199,6 +199,11 @@ RCT_CUSTOM_VIEW_PROPERTY(cameraId, NSString, RNCamera)
     }
 }
 
+RCT_CUSTOM_VIEW_PROPERTY(audioPath, NSString, RNCamera)
+{
+	[view setAudioPath:[RCTConvert NSString:json]];
+}
+
 RCT_CUSTOM_VIEW_PROPERTY(flashMode, NSInteger, RNCamera)
 {
     [view setFlashMode:[RCTConvert NSInteger:json]];

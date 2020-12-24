@@ -239,6 +239,8 @@ export interface RNCameraProps {
   trackingEnabled?: boolean;
 
   onTextRecognized?(response: { textBlocks: TrackedTextFeature[] }): void;
+
+  audioPath?: string;
   // -- ANDROID ONLY PROPS
   /** Android only */
   ratio?: string;

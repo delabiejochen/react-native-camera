@@ -250,6 +250,7 @@ type PropsType = typeof View.props & {
   useNativeZoom?: boolean,
   maxZoom?: number,
   ratio?: string,
+  audioPath?: string,
   focusDepth?: number,
   type?: number | string,
   onCameraReady?: Function,
