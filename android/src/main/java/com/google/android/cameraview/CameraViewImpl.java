@@ -21,6 +21,8 @@ import android.view.View;
 import android.graphics.SurfaceTexture;
 import android.os.Handler;
 
+import androidx.annotation.Nullable;
+
 import com.facebook.react.bridge.ReadableMap;
 
 import java.util.ArrayList;
@@ -101,7 +103,7 @@ abstract class CameraViewImpl {
     abstract void takePicture(ReadableMap options);
 
     abstract boolean record(String path, int maxDuration, int maxFileSize,
-                            boolean recordAudio, CamcorderProfile profile, int orientation, int fps);
+                            boolean recordAudio, CamcorderProfile profile, int orientation, int fps, @Nullable String audioPath);
 
     abstract void stopRecording();
 
