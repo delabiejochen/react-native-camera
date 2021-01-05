@@ -93,6 +93,8 @@ BOOL _sessionInterrupted = NO;
 		self.invertImageData = true;
 		_recordRequested = NO;
 		_sessionInterrupted = NO;
+		
+//		self.audioPath = @"sounds-compiled/sounds_ablo_around_the_world.m4a";
 
 		// we will do other initialization after
 		// the view is loaded.
@@ -1219,7 +1221,11 @@ BOOL _sessionInterrupted = NO;
 				
 				// play sound if property is set
 				if (self.audioPath) {
-					[self playAudioPathSound];
+					NSURL *url = [NSURL fileURLWithPath:self.audioPath];
+					NSString *type = url.pathExtension;
+					NSString *file = [url.path.lastPathComponent stringByDeletingPathExtension];
+					NSString *directory = [[url.path stringByDeletingLastPathComponent] lastPathComponent];
+					[self playSoundWithFile:file ofType:type inDirectory:directory];
 				}
 
 				[self onRecordingStart:@{
@@ -1248,7 +1254,7 @@ BOOL _sessionInterrupted = NO;
 		if ([self.movieFileOutput isRecording]) {
 			[self.movieFileOutput stopRecording];
 			[self onRecordingEnd:@{}];
-			[self stopAudioPathSound];
+			[self stopSound];
 		} else {
 			if(_recordRequested){
 				_recordRequested = NO;
@@ -1258,6 +1264,32 @@ BOOL _sessionInterrupted = NO;
 			}
 		}
 	});
+}
+
+- (void)playSoundWithFile:(NSString*)file ofType:(NSString*)type inDirectory:(NSString*)directory
+{
+	NSString *soundFilePath = [[NSBundle mainBundle] pathForResource:file ofType:type inDirectory:directory];
+	if (soundFilePath) {
+		NSURL *soundFileURL = [NSURL fileURLWithPath:soundFilePath];
+		
+		if (self.soundPlayer) {
+			[self.soundPlayer stop];
+		}
+		self.soundPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:soundFileURL error:nil];
+		self.soundPlayer.numberOfLoops = 0; //-1;
+		
+		[self.soundPlayer play];
+	} else {
+		NSLog(@"no sound found at path");
+	}
+}
+
+- (void)stopSound
+{
+	if (self.soundPlayer) {
+		[self.soundPlayer stop];
+		self.soundPlayer = nil;
+	}
 }
 
 - (void)resumePreview
@@ -2260,36 +2292,6 @@ BOOL _sessionInterrupted = NO;
 
 - (bool)isRecording {
 	return self.movieFileOutput != nil ? self.movieFileOutput.isRecording : NO;
-}
-
-- (void)setAudioPath:(NSString *)audioPath
-{
-	_audioPath = audioPath;
-	
-	NSURL *url = [NSURL fileURLWithPath:audioPath];
-	NSString *type = url.pathExtension;
-	NSString *file = [url.path.lastPathComponent stringByDeletingPathExtension];
-	NSString *directory = [[url.path stringByDeletingLastPathComponent] lastPathComponent];
-	NSString *soundFilePath = [[NSBundle mainBundle] pathForResource:file ofType:type inDirectory:directory];
-
-	if (soundFilePath) {
-		NSURL *soundFileURL = [NSURL fileURLWithPath:soundFilePath];
-		self.soundPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:soundFileURL error:nil];
-		[self.soundPlayer prepareToPlay];
-		self.soundPlayer.numberOfLoops = 0; //-1;
-	} else {
-		NSLog(@"Error; no sound file found at path %@", audioPath);
-	}
-}
-
-- (void)playAudioPathSound
-{
-	[self.soundPlayer play];
-}
-
-- (void)stopAudioPathSound
-{
-	[self.soundPlayer stop];
 }
 
 @end
