@@ -590,7 +590,9 @@ class Camera2 extends CameraViewImpl implements MediaRecorder.OnInfoListener, Me
             if (audioFile != null) {
                 setupAudioPlayer(audioFile);
                 try {
-                    mAudioPlayer.prepare();
+                    if (mAudioPlayer != null) {
+                        mAudioPlayer.prepare();
+                    }
                 } catch (IOException e) {
                     mAudioPlayer = null;
                 }
@@ -615,7 +617,7 @@ class Camera2 extends CameraViewImpl implements MediaRecorder.OnInfoListener, Me
                     mSessionCallback, null);
                 mMediaRecorder.start();
 
-                if (audioFile != null) {
+                if (audioFile != null && mAudioPlayer != null) {
                     mAudioPlayer.start();
                 }
                 mIsRecording = true;
